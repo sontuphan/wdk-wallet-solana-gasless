@@ -1,0 +1,74 @@
+{
+  "name": "@tetherto/wdk-wallet-solana-gasless",
+  "version": "1.0.0-beta.1",
+  "description": "A simple package to manage BIP-32 wallets for the solana blockchain, which implement the gasless functionality.",
+  "keywords": [
+    "wdk",
+    "wallet",
+    "slip-10",
+    "solana",
+    "gasless"
+  ],
+  "author": "Tether",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tetherto/wdk-wallet-solana-gasless.git"
+  },
+  "main": "index.js",
+  "type": "module",
+  "types": "./types",
+  "scripts": {
+    "build:types": "tsc",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest tests/integration",
+    "test:integration:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest tests/integration --coverage"
+  },
+  "dependencies": {
+    "@solana-program/system": "0.9.0",
+    "@solana-program/token": "0.7.0",
+    "@solana/addresses": "3.0.3",
+    "@solana/kit": "6.1.0",
+    "@solana/kit-plugin-instruction-plan": "0.6.0",
+    "@solana/kit-plugin-payer": "0.6.0",
+    "@solana/kit-plugin-rpc": "0.6.0",
+    "@solana/kora": "0.2.1",
+    "@solana/rpc": "3.0.3",
+    "@solana/signers": "3.0.3",
+    "@solana/transaction-messages": "3.0.3",
+    "@solana/transactions": "3.0.3",
+    "@tetherto/wdk-wallet": "1.0.0-beta.8",
+    "@tetherto/wdk-wallet-solana": "github:sontuphan/wdk-wallet-solana#feat/sync-constructor",
+    "bare-node-runtime": "1.3.1"
+  },
+  "devDependencies": {
+    "cross-env": "10.1.0",
+    "dotenv": "17.4.2",
+    "jest": "30.4.2",
+    "standard": "17.1.2",
+    "typescript": "6.0.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "bare": "./bare.js",
+      "default": "./index.js"
+    },
+    "./package": {
+      "default": "./package.json"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "standard": {
+    "ignore": [
+      "bare.js",
+      "tests/**/*.js"
+    ]
+  }
+}

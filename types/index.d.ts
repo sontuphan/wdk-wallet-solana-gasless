@@ -1,0 +1,11 @@
+export { default } from "./src/wallet-manager-solana-gasless.js";
+export { default as WalletAccountReadOnlySolanaGasless } from "./src/wallet-account-read-only-solana-gasless.js";
+export { default as WalletAccountSolanaGasless } from "./src/wallet-account-solana-gasless.js";
+export type KeyPair = import("@tetherto/wdk-wallet").KeyPair;
+export type TransactionResult = import("@tetherto/wdk-wallet").TransactionResult;
+export type TransferOptions = import("@tetherto/wdk-wallet-solana").TransferOptions;
+export type TransferResult = import("@tetherto/wdk-wallet-solana").TransferResult;
+export type SolanaTransactionReceipt = import("./src/wallet-account-read-only-solana-gasless.js").SolanaTransactionReceipt;
+export type SolanaTransaction = import("./src/wallet-account-read-only-solana-gasless.js").SolanaTransaction;
+export type SolanaGaslessWalletPaymasterConfig = import("./src/wallet-account-read-only-solana-gasless.js").SolanaGaslessWalletPaymasterConfig;
+export type SolanaGaslessWalletConfig = import("./src/wallet-account-read-only-solana-gasless.js").SolanaGaslessWalletConfig;
