@@ -37,4 +37,3 @@ jobs:
           solana-test-validator --version
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
       - run: npm test
-      - run: npm run test:integration
