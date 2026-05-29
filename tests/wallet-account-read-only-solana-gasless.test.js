@@ -232,14 +232,28 @@ describe('WalletAccountReadOnlySolanaGasless', () => {
 
   describe('getPaymasterTokenBalance', () => {
     test('should return the configured paymaster token balance', async () => {
-      const getTokenBalance = jest
-        .spyOn(readOnlyAccount, 'getTokenBalance')
-        .mockResolvedValue(123456n)
+      mockRpc.getAccountInfo.mockReturnValue({
+        send: jest.fn().mockResolvedValue({
+          value: {
+            owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+            lamports: 2039280n,
+            data: [Buffer.alloc(165).toString('base64'), 'base64']
+          }
+        })
+      })
+      mockRpc.getTokenAccountBalance.mockReturnValue({
+        send: jest.fn().mockResolvedValue({
+          value: {
+            amount: '123456'
+          }
+        })
+      })
 
       const balance = await readOnlyAccount.getPaymasterTokenBalance()
 
       expect(balance).toBe(123456n)
-      expect(getTokenBalance).toHaveBeenCalledWith(TEST_PAYMASTER_TOKEN)
+      expect(mockRpc.getAccountInfo).toHaveBeenCalledTimes(1)
+      expect(mockRpc.getTokenAccountBalance).toHaveBeenCalledTimes(1)
     })
   })
 
