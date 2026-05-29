@@ -458,8 +458,6 @@ describe('WalletAccountReadOnlySolanaGasless', () => {
 
       expect(await readOnlyAccount.verify(message, signature)).toBe(true)
       expect(await readOnlyAccount.verify(message, signature)).toBe(true)
-
-      account.dispose()
     })
 
     test('should reject signature for different message', async () => {
@@ -476,8 +474,6 @@ describe('WalletAccountReadOnlySolanaGasless', () => {
 
       expect(await readOnlyAccount.verify('Message 1', signature)).toBe(true)
       expect(await readOnlyAccount.verify('Message 2', signature)).toBe(false)
-
-      account.dispose()
     })
 
     test('should reject invalid hex signature', async () => {

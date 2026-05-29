@@ -115,9 +115,10 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * Signs a transaction.
    *
    * @param {SolanaTransaction} tx - The transaction to sign.
+   * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
    * @returns {Promise<FullySignedTransaction>} The signed transaction.
    */
-  async signTransaction (tx) {
+  async signTransaction (tx, config = {}) {
     if (!this.keyPair.privateKey) {
       throw new Error('The wallet account has been disposed.')
     }
@@ -126,7 +127,13 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
       throw new Error('The wallet must be connected to a paymaster to sign transactions.')
     }
 
-    const { transactionMessage } = await this._populateTransactionMessage(tx)
+    const mergedConfig = { ...this._config, ...config }
+
+    const { fee, transactionMessage } = await this._populateTransactionMessage(tx, mergedConfig)
+
+    if (mergedConfig.transferMaxFee !== undefined && fee >= mergedConfig.transferMaxFee) {
+      throw new Error('Exceeded maximum fee cost for transfer operation.')
+    }
 
     const partiallySignedTransactionMessage = await partiallySignTransactionMessageWithSigners(transactionMessage)
 

@@ -75,8 +75,6 @@ describe('WalletManagerSolanaGasless', () => {
       const account = await wallet.getAccount()
 
       expect(account).toBeInstanceOf(WalletAccountSolanaGasless)
-
-      wallet.dispose()
     })
 
     test('should throw if the index is a negative number', async () => {
@@ -97,6 +95,51 @@ describe('WalletManagerSolanaGasless', () => {
     test('should throw if the path is invalid', async () => {
       await expect(wallet.getAccountByPath("a'/b'/c'"))
         .rejects.toThrow("Invalid child index: a'")
+    })
+  })
+
+  describe('dispose', () => {
+    let wallet
+
+    beforeEach(() => {
+      wallet = new WalletManagerSolanaGasless(TEST_SEED_PHRASE, TEST_CONFIG)
+    })
+
+    afterEach(() => {
+      wallet.dispose()
+    })
+
+    test('should clear the accounts cache after the wallet manager is disposed', async () => {
+      await wallet.getAccount(99)
+      await wallet.getAccount(100)
+
+      expect(Object.values(wallet._accounts)).toHaveLength(2)
+
+      wallet.dispose()
+
+      expect(Object.values(wallet._accounts)).toHaveLength(0)
+    })
+
+    test('should clear the child accounts\' private key after the wallet manager is disposed', async () => {
+      const tempAccount = await wallet.getAccount(99)
+
+      expect(Buffer.from(tempAccount.keyPair.privateKey).toString('hex')).toBe(
+          '384c61286f76b885903cb4f9562d6dccaf37a6732600cebd675733203426a4fc'
+        )
+
+      wallet.dispose()
+
+      expect(tempAccount.keyPair.privateKey).toBeNull()
+    })
+    
+    test('should keep the child accounts\' public key accessible after disposal', async () => {
+      const tempAccount = await wallet.getAccount(98)
+
+      wallet.dispose()
+
+      expect(Buffer.from(tempAccount.keyPair.publicKey).toString('hex')).toBe(
+        '5a84997ab4e543bd48a39f6aab2db7c0816f958167a56d4a9da0fd7b58517324'
+      )
     })
   })
 })

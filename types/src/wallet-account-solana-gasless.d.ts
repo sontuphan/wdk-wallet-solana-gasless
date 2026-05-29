@@ -57,9 +57,10 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
      * Signs a transaction.
      *
      * @param {SolanaTransaction} tx - The transaction to sign.
+     * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
      * @returns {Promise<FullySignedTransaction>} The signed transaction.
      */
-    signTransaction(tx: SolanaTransaction): Promise<FullySignedTransaction>;
+    signTransaction(tx: SolanaTransaction, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<FullySignedTransaction>;
     /**
      * Sends a transaction.
      *
