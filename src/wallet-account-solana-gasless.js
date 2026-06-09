@@ -118,7 +118,13 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @returns {Promise<FullySignedTransaction>} The signed transaction.
    */
   async signTransaction (tx, config = {}) {
-    const { transactionMessage } = await this._populateTransactionMessage(tx, config)
+    const mergedConfig = { ...this._config, ...config }
+
+    const { fee, transactionMessage } = await this._populateTransactionMessage(tx, config)
+
+    if (mergedConfig.transactionMaxFee !== undefined && fee >= mergedConfig.transactionMaxFee) {
+      throw new Error('Exceeded maximum fee cost for transaction operation.')
+    }
 
     const partiallySignedTransactionMessage = await partiallySignTransactionMessageWithSigners(transactionMessage)
 
@@ -143,7 +149,13 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @returns {Promise<TransactionResult>} The transaction's result.
    */
   async sendTransaction (tx, config = {}) {
+    const mergedConfig = { ...this._config, ...config }
+
     const { fee, transactionMessage } = await this._populateTransactionMessage(tx, config)
+
+    if (mergedConfig.transactionMaxFee !== undefined && fee >= mergedConfig.transactionMaxFee) {
+      throw new Error('Exceeded maximum fee cost for transaction operation.')
+    }
 
     const partiallySignedTransactionMessage = await partiallySignTransactionMessageWithSigners(transactionMessage)
 
