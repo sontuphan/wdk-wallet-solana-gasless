@@ -122,7 +122,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
 
     const { fee, transactionMessage } = await this._populateTransactionMessage(tx, config)
 
-    if (mergedConfig.transactionMaxFee !== undefined && fee >= mergedConfig.transactionMaxFee) {
+    if (mergedConfig.transactionMaxFee !== undefined && fee > mergedConfig.transactionMaxFee) {
       throw new Error('Exceeded maximum fee cost for transaction operation.')
     }
 
@@ -153,7 +153,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
 
     const { fee, transactionMessage } = await this._populateTransactionMessage(tx, config)
 
-    if (mergedConfig.transactionMaxFee !== undefined && fee >= mergedConfig.transactionMaxFee) {
+    if (mergedConfig.transactionMaxFee !== undefined && fee > mergedConfig.transactionMaxFee) {
       throw new Error('Exceeded maximum fee cost for transaction operation.')
     }
 
@@ -180,7 +180,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
 
     const { fee, transactionMessage } = await this._populateTransactionMessage(tx, mergedConfig)
 
-    if (mergedConfig.transferMaxFee !== undefined && fee >= mergedConfig.transferMaxFee) {
+    if (mergedConfig.transferMaxFee !== undefined && fee > mergedConfig.transferMaxFee) {
       throw new Error('Exceeded maximum fee cost for transfer operation.')
     }
 
