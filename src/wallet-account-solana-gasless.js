@@ -116,6 +116,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @param {SolanaTransaction} tx - The transaction to sign.
    * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
    * @returns {Promise<FullySignedTransaction>} The signed transaction.
+   * @throws {Error} If the transaction's cost exceeds the maximum transaction fee option.
    */
   async signTransaction (tx, config = {}) {
     const mergedConfig = { ...this._config, ...config }
@@ -147,6 +148,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @param {SolanaTransaction} tx - The transaction.
    * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
    * @returns {Promise<TransactionResult>} The transaction's result.
+   * @throws {Error} If the transaction's cost exceeds the maximum transaction fee option.
    */
   async sendTransaction (tx, config = {}) {
     const mergedConfig = { ...this._config, ...config }
@@ -172,6 +174,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @param {TransferOptions} options - The transfer's options.
    * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
    * @returns {Promise<TransferResult>} The transfer's result.
+   * @throws {Error} If the transfer's cost exceeds the maximum transfer fee option.
    */
   async transfer ({ token, recipient, amount }, config = {}) {
     const mergedConfig = { ...this._config, ...config }
