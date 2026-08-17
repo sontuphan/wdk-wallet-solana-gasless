@@ -1,3 +1,15 @@
+/** @typedef {import("@tetherto/wdk-wallet").IWalletAccount} IWalletAccount */
+/** @typedef {import('@tetherto/wdk-wallet').KeyPair} KeyPair */
+/** @typedef {import('@tetherto/wdk-wallet').TransactionResult} TransactionResult */
+/** @typedef {import('@solana/transaction-messages').TransactionMessage} TransactionMessage */
+/** @typedef {import('@solana/transactions').FullySignedTransaction} FullySignedTransaction */
+/** @typedef {import('@tetherto/wdk-wallet-solana').SolanaTransaction} SolanaTransaction */
+/** @typedef {import('@tetherto/wdk-wallet-solana').SolanaWalletConfig} SolanaWalletConfig */
+/** @typedef {import('@tetherto/wdk-wallet-solana').TransferOptions} TransferOptions */
+/** @typedef {import('@tetherto/wdk-wallet-solana').TransferResult} TransferResult */
+/** @typedef {import('./wallet-account-read-only-solana-gasless.js').SolanaGaslessWalletConfig} SolanaGaslessWalletConfig */
+/** @typedef {import('./wallet-account-read-only-solana-gasless.js').SolanaGaslessWalletPaymasterConfigOverrides} SolanaGaslessWalletPaymasterConfigOverrides */
+/** @implements {IWalletAccount<FullySignedTransaction>} */
 export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySolanaGasless implements IWalletAccount<FullySignedTransaction> {
     /**
      * Creates a new solana gasless wallet account.
@@ -7,13 +19,6 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
      * @param {SolanaGaslessWalletConfig} config - The configuration object.
      */
     constructor(seed: string | Uint8Array, path: string, config: SolanaGaslessWalletConfig);
-    /**
-     * The solana gasless wallet account configuration.
-     *
-     * @protected
-     * @type {SolanaGaslessWalletConfig}
-     */
-    protected _config: SolanaGaslessWalletConfig;
     /** @private */
     private _ownerAccount;
     /** @private */
@@ -40,12 +45,6 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
      * @type {KeyPair}
      */
     get keyPair(): KeyPair;
-    /**
-     * The address of this account.
-     *
-     * @returns {Promise<string>} The address.
-     */
-    getAddress(): Promise<string>;
     /**
      * Signs a message.
      *
@@ -133,14 +132,15 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
     /** @private */
     private _getSigner;
 }
-export type IWalletAccount<TSignedTransaction> = import("@tetherto/wdk-wallet").IWalletAccount<TSignedTransaction>;
+export type IWalletAccount = import("@tetherto/wdk-wallet").IWalletAccount;
 export type KeyPair = import("@tetherto/wdk-wallet").KeyPair;
 export type TransactionResult = import("@tetherto/wdk-wallet").TransactionResult;
-export type TransferOptions = import("@tetherto/wdk-wallet-solana").TransferOptions;
-export type TransferResult = import("@tetherto/wdk-wallet-solana").TransferResult;
 export type TransactionMessage = import("@solana/transaction-messages").TransactionMessage;
 export type FullySignedTransaction = import("@solana/transactions").FullySignedTransaction;
-export type SolanaTransaction = import("./wallet-account-read-only-solana-gasless.js").SolanaTransaction;
+export type SolanaTransaction = import("@tetherto/wdk-wallet-solana").SolanaTransaction;
+export type SolanaWalletConfig = import("@tetherto/wdk-wallet-solana").SolanaWalletConfig;
+export type TransferOptions = import("@tetherto/wdk-wallet-solana").TransferOptions;
+export type TransferResult = import("@tetherto/wdk-wallet-solana").TransferResult;
 export type SolanaGaslessWalletConfig = import("./wallet-account-read-only-solana-gasless.js").SolanaGaslessWalletConfig;
 export type SolanaGaslessWalletPaymasterConfigOverrides = import("./wallet-account-read-only-solana-gasless.js").SolanaGaslessWalletPaymasterConfigOverrides;
 import WalletAccountReadOnlySolanaGasless from './wallet-account-read-only-solana-gasless.js';

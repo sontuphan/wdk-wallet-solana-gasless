@@ -1,3 +1,4 @@
+/** @typedef {import('./wallet-account-solana-gasless.js').SolanaGaslessWalletConfig} SolanaGaslessWalletConfig */
 export default class WalletManagerSolanaGasless extends WalletManager {
     /**
      * Creates a new wallet manager for the gasless solana.
@@ -6,13 +7,6 @@ export default class WalletManagerSolanaGasless extends WalletManager {
      * @param {SolanaGaslessWalletConfig} [config] - The configuration object.
      */
     constructor(seed: string | Uint8Array, config?: SolanaGaslessWalletConfig);
-    /**
-     * The solana gasless wallet configuration.
-     *
-     * @protected
-     * @type {SolanaGaslessWalletConfig}
-     */
-    protected _config: SolanaGaslessWalletConfig;
     /**
      * Returns the wallet account at a specific index (see [SLIP-0010](https://slips.readthedocs.io/en/latest/slip-0010/)).
      *

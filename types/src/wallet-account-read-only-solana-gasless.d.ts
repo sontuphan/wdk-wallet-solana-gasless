@@ -1,5 +1,14 @@
 export default class WalletAccountReadOnlySolanaGasless extends WalletAccountReadOnly {
     /**
+     * Validates the configuration to ensure all required fields are present.
+     *
+     * @protected
+     * @param {Omit<SolanaGaslessWalletConfig, 'transferMaxFee' | 'transactionMaxFee'>} config - The configuration to validate.
+     * @throws {ConfigurationError} If the configuration is invalid or has missing required fields.
+     * @returns {void}
+     */
+    protected static _validateConfig(config: Omit<SolanaGaslessWalletConfig, "transferMaxFee" | "transactionMaxFee">): void;
+    /**
      * Creates a new solana read-only wallet account.
      *
      * @param {string} addr - The account's address.
@@ -38,19 +47,6 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
      */
     protected _paymaster: KoraClient;
     /**
-     * Returns the account's native SOL balance.
-     *
-     * @returns {Promise<bigint>} The sol balance (in lamports).
-     */
-    getBalance(): Promise<bigint>;
-    /**
-     * Returns the account balance for a specific SPL token.
-     *
-     * @param {string} tokenAddress - The mint address of the token.
-     * @returns {Promise<bigint>} The token balance (in base unit).
-     */
-    getTokenBalance(tokenAddress: string): Promise<bigint>;
-    /**
      * Returns the account balances for a list of SPL tokens.
      *
      * @param {string[]} tokenAddresses - The mint addresses of the tokens.
@@ -79,7 +75,7 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
      * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
      * @returns {Promise<Omit<TransferResult, 'hash'>>} The transfer's quotes.
      */
-    quoteTransfer(options: TransferOptions, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<Omit<TransferResult, "hash">>;
+    quoteTransfer({ token, recipient, amount }: TransferOptions, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<Omit<TransferResult, "hash">>;
     /**
      * Retrieves a transaction receipt by its signature
      *
@@ -87,33 +83,6 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
      * @returns {Promise<SolanaTransactionReceipt | null>} — The receipt, or null if the transaction has not been included in a block yet.
      */
     getTransactionReceipt(hash: string): Promise<SolanaTransactionReceipt | null>;
-    /**
-     * Verifies a message's signature.
-     *
-     * @param {string} message - The original message.
-     * @param {string} signature - The signature to verify.
-     * @returns {Promise<boolean>} True if the signature is valid.
-     */
-    verify(message: string, signature: string): Promise<boolean>;
-    /**
-     * Validates the configuration to ensure all required fields are present.
-     *
-     * @protected
-     * @param {Omit<SolanaGaslessWalletConfig, 'transferMaxFee'>} config - The configuration to validate.
-     * @throws {ConfigurationError} If the configuration is invalid or has missing required fields.
-     * @returns {void}
-     */
-    protected static _validateConfig (config: Omit<SolanaGaslessWalletConfig, 'transferMaxFee'>): void
-
-    /**
-     * Creates a FailoverProvider from the configured providers. If only one provider is supplied, it is wrapped and returned.
-     *
-     * @protected
-     * @param {Omit<SolanaGaslessWalletConfig, 'transferMaxFee'>} [config] - The configuration object.
-     * @returns {KoraClient} A wrapped KoraClient instance.
-     * @throws {ConfigurationError} If the `paymasterUrl` option is set to an empty array.
-     */
-    protected _createFailoverProvider (config?: Omit<SolanaGaslessWalletConfig, 'transferMaxFee'>): KoraClient
     /**
      * Builds a transaction message for native SOL transfer.
      * Creates a transfer instruction for sending SOL.
@@ -124,6 +93,15 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
      * @returns {Promise<TransactionMessage>} The constructed transaction message.
      */
     protected _buildNativeTransferTransactionMessage(to: string, value: number | bigint): Promise<TransactionMessage>;
+    /**
+     * Creates a FailoverProvider from the configured providers. If only one provider is supplied, it is wrapped and returned.
+     *
+     * @protected
+     * @param {Omit<SolanaGaslessWalletConfig, 'transferMaxFee' | 'transactionMaxFee'>} [config] - The configuration object.
+     * @returns {KoraClient} A wrapped KoraClient instance.
+     * @throws {ConfigurationError} If the `paymasterUrl` option is set to an empty array.
+     */
+    protected _createFailoverProvider(config?: Omit<SolanaGaslessWalletConfig, "transferMaxFee" | "transactionMaxFee">): KoraClient;
     /**
      * Builds a transaction message for SPL token transfer.
      * Creates instructions for ATA creation (if needed) and token transfer.
@@ -175,7 +153,6 @@ export type SolanaTransaction = import("@tetherto/wdk-wallet-solana").SolanaTran
 export type SolanaWalletConfig = import("@tetherto/wdk-wallet-solana").SolanaWalletConfig;
 export type TransferOptions = import("@tetherto/wdk-wallet-solana").TransferOptions;
 export type TransferResult = import("@tetherto/wdk-wallet-solana").TransferResult;
-import { ConfigurationError } from './errors.js';
 export type PaymasterTokenConfig = {
     /**
      * - The address of the paymaster token.
