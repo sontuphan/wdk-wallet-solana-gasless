@@ -1,6 +1,6 @@
 {
   "name": "@tetherto/wdk-wallet-solana-gasless",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0-beta.8",
   "description": "Solana wallet module for WDK (Wallet Development Kit) by Tether with paymaster support for gasless transfers.",
   "homepage": "https://docs.wdk.tether.io/sdk/wallet-modules/wallet-solana-gasless/",
   "keywords": [
