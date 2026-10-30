@@ -70,9 +70,13 @@ const config = {
   paymasterToken: {
     address: 'TokenMint111111111111111111111111111111111'
   },
-  transferMaxFee: 1000000n
+  // Maximum paymaster fees, in the paymaster token's base units.
+  transferMaxFee: 1000000n,
+  transactionMaxFee: 1000000n
 }
 ```
+
+`transferMaxFee` caps `transfer`, and `transactionMaxFee` caps `sendTransaction` and `signTransaction`. Both are in the paymaster token's base units and default to `1000000n` (1 USDT for a 6-decimal paymaster token) when not set, so a paymaster cannot charge an unbounded fee. Set a higher value to allow larger fees, or a lower one for a paymaster token with fewer decimals.
 
 `provider` and `paymasterUrl` may also be arrays. When arrays are provided, the wallet uses failover behavior and retries requests against the configured providers.
 

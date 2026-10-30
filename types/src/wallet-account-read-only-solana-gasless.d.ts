@@ -198,9 +198,9 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
      * @protected
      * @param {TransactionMessage} transactionMessage - The transaction message to fetch the payment info.
      * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
-     * @returns {Promise<GetPaymentInstructionResponse>} The payment info.
+     * @returns {Promise<Omit<GetPaymentInstructionResponse, 'payment_amount'> & { payment_amount: bigint }>} The payment info, with the payment amount decoded from the payment instruction (in the paymaster token's base units).
      */
-    protected _getTransactionPaymentInfo(transactionMessage: TransactionMessage, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<GetPaymentInstructionResponse>;
+    protected _getTransactionPaymentInfo(transactionMessage: TransactionMessage, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<Omit<GetPaymentInstructionResponse, 'payment_amount'> & { payment_amount: bigint }>;
     /**
      * Merges a caller's configuration overrides on top of the account's configuration. Keys whose
      * override value is `undefined` keep the configured value, so an option left unset in an

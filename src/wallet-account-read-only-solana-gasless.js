@@ -230,7 +230,7 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
 
     const { payment_amount: fee } = await this._getTransactionPaymentInfo(transactionMessage, config)
 
-    return { fee: BigInt(fee) }
+    return { fee }
   }
 
   /**
@@ -245,7 +245,7 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
 
     const { payment_amount: fee } = await this._getTransactionPaymentInfo(transactionMessage, config)
 
-    return { fee: BigInt(fee) }
+    return { fee }
   }
 
   /**
@@ -490,7 +490,7 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
    * @protected
    * @param {TransactionMessage} transactionMessage - The transaction message to fetch the payment info.
    * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
-   * @returns {Promise<GetPaymentInstructionResponse>} The payment info.
+   * @returns {Promise<Omit<GetPaymentInstructionResponse, 'payment_amount'> & { payment_amount: bigint }>} The payment info, with the payment amount decoded from the payment instruction (in the paymaster token's base units).
    */
   async _getTransactionPaymentInfo (transactionMessage, config = {}) {
     const mergedConfig = this._mergeConfig(config)
@@ -520,7 +520,7 @@ export default class WalletAccountReadOnlySolanaGasless extends WalletAccountRea
 
     return {
       ...payment,
-      payment_amount: Number(paymentAmount),
+      payment_amount: paymentAmount,
       payment_instruction: upgradedPaymentInstruction
     }
   }

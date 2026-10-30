@@ -44,6 +44,12 @@ import WalletAccountReadOnlySolanaGasless from './wallet-account-read-only-solan
 /** @typedef {import('./wallet-account-read-only-solana-gasless.js').SolanaGaslessWalletConfig} SolanaGaslessWalletConfig */
 /** @typedef {import('./wallet-account-read-only-solana-gasless.js').SolanaGaslessWalletPaymasterConfigOverrides} SolanaGaslessWalletPaymasterConfigOverrides */
 
+/**
+ * The maximum fee (in the paymaster token's base units) that a transfer or a transaction may cost when
+ * the `transferMaxFee` or `transactionMaxFee` option is not set: 1 USDT for a 6-decimal paymaster token.
+ */
+const DEFAULT_MAX_FEE = 1_000_000n
+
 /** @implements {IWalletAccount<FullySignedTransaction>} */
 export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySolanaGasless {
   /**
@@ -51,7 +57,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    *
    * @param {string | Uint8Array} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) mnemonic seed phrase, or a raw BIP-32 master seed (16-64 bytes).
    * @param {string} path - The SLIP-0010 derivation path (e.g. "0'/0'/0'").
-   * @param {SolanaGaslessWalletConfig} config - The configuration object.
+   * @param {SolanaGaslessWalletConfig} config - The configuration object. The `transferMaxFee` and `transactionMaxFee` options are in the paymaster token's base units and default to 1,000,000 (1 USDT for a 6-decimal paymaster token).
    */
   constructor (seed, path, config) {
     const ownerAccount = new WalletAccountSolana(seed, path, config)
@@ -121,14 +127,14 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @param {SolanaTransaction} tx - The transaction to sign.
    * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
    * @returns {Promise<FullySignedTransaction>} The signed transaction.
-   * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option.
+   * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option (1,000,000 base units of the paymaster token if not set).
    */
   async signTransaction (tx, config = {}) {
     const mergedConfig = this._mergeConfig(config)
 
     const { fee, transactionMessage } = await this._populateTransactionMessage(tx, config)
 
-    if (mergedConfig.transactionMaxFee !== undefined && fee > mergedConfig.transactionMaxFee) {
+    if (fee > (mergedConfig.transactionMaxFee ?? DEFAULT_MAX_FEE)) {
       throw new MaximumFeeExceededError('Exceeded maximum fee cost for transaction operation.')
     }
 
@@ -154,7 +160,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @param {SolanaTransaction | FullySignedTransaction} tx - The transaction. Either an unsigned transaction or an already-signed transaction (as returned by `signTransaction`).
    * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
    * @returns {Promise<TransactionResult>} The transaction's result.
-   * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option.
+   * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option (1,000,000 base units of the paymaster token if not set).
    * @note When an already-signed transaction is passed, the paymaster has already co-signed it at sign time, so it is not contacted again and the transaction is broadcast directly to the network. The returned `fee` is decoded from the gasless payment instruction embedded in the signed message, and the `transactionMaxFee` check is re-applied before broadcasting. The `paymasterToken` option must name the same token the transaction was signed with.
    */
   async sendTransaction (tx, config = {}) {
@@ -163,7 +169,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
 
       const fee = await this._getSignedTransactionFee(tx, mergedConfig.paymasterToken.address)
 
-      if (mergedConfig.transactionMaxFee !== undefined && fee > mergedConfig.transactionMaxFee) {
+      if (fee > (mergedConfig.transactionMaxFee ?? DEFAULT_MAX_FEE)) {
         throw new MaximumFeeExceededError('Exceeded maximum fee cost for transaction operation.')
       }
 
@@ -176,7 +182,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
 
     const { fee, transactionMessage } = await this._populateTransactionMessage(tx, config)
 
-    if (mergedConfig.transactionMaxFee !== undefined && fee > mergedConfig.transactionMaxFee) {
+    if (fee > (mergedConfig.transactionMaxFee ?? DEFAULT_MAX_FEE)) {
       throw new MaximumFeeExceededError('Exceeded maximum fee cost for transaction operation.')
     }
 
@@ -217,7 +223,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
    * @param {TransferOptions} options - The transfer's options.
    * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
    * @returns {Promise<TransferResult>} The transfer's result.
-   * @throws {MaximumFeeExceededError} If the transfer's cost exceeds the maximum transfer fee option.
+   * @throws {MaximumFeeExceededError} If the transfer's cost exceeds the maximum transfer fee option (1,000,000 base units of the paymaster token if not set).
    */
   async transfer ({ token, recipient, amount }, config = {}) {
     const mergedConfig = this._mergeConfig(config)
@@ -226,7 +232,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
 
     const { fee, transactionMessage } = await this._populateTransactionMessage(tx, mergedConfig)
 
-    if (mergedConfig.transferMaxFee !== undefined && fee > mergedConfig.transferMaxFee) {
+    if (fee > (mergedConfig.transferMaxFee ?? DEFAULT_MAX_FEE)) {
       throw new MaximumFeeExceededError('Exceeded maximum fee cost for transfer operation.')
     }
 
@@ -299,7 +305,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
       })
     )
 
-    return { fee: BigInt(fee), transactionMessage }
+    return { fee, transactionMessage }
   }
 
   /**

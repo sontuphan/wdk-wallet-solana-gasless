@@ -4,7 +4,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
      *
      * @param {string | Uint8Array} seed - A [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) mnemonic seed phrase, or a raw BIP-32 master seed (16-64 bytes).
      * @param {string} path - The SLIP-0010 derivation path (e.g. "0'/0'/0'").
-     * @param {SolanaGaslessWalletConfig} config - The configuration object.
+     * @param {SolanaGaslessWalletConfig} config - The configuration object. The `transferMaxFee` and `transactionMaxFee` options are in the paymaster token's base units and default to 1,000,000 (1 USDT for a 6-decimal paymaster token).
      */
     constructor(seed: string | Uint8Array, path: string, config: SolanaGaslessWalletConfig);
     /**
@@ -59,7 +59,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
      * @param {SolanaTransaction} tx - The transaction to sign.
      * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
      * @returns {Promise<FullySignedTransaction>} The signed transaction.
-     * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option.
+     * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option (1,000,000 base units of the paymaster token if not set).
      */
     signTransaction(tx: SolanaTransaction, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<FullySignedTransaction>;
     /**
@@ -68,7 +68,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
      * @param {SolanaTransaction | FullySignedTransaction} tx - The transaction. Either an unsigned transaction or an already-signed transaction (as returned by `signTransaction`).
      * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
      * @returns {Promise<TransactionResult>} The transaction's result.
-     * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option.
+     * @throws {MaximumFeeExceededError} If the transaction's cost exceeds the maximum transaction fee option (1,000,000 base units of the paymaster token if not set).
      * @note When an already-signed transaction is passed, the paymaster has already co-signed it at sign time, so it is not contacted again and the transaction is broadcast directly to the network. The returned `fee` is decoded from the gasless payment instruction embedded in the signed message, and the `transactionMaxFee` check is re-applied before broadcasting. The `paymasterToken` option must name the same token the transaction was signed with.
      */
     sendTransaction(tx: SolanaTransaction | FullySignedTransaction, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<TransactionResult>;
@@ -87,7 +87,7 @@ export default class WalletAccountSolanaGasless extends WalletAccountReadOnlySol
      * @param {TransferOptions} options - The transfer's options.
      * @param {SolanaGaslessWalletPaymasterConfigOverrides} [config] - If set, overrides the given configuration options.
      * @returns {Promise<TransferResult>} The transfer's result.
-     * @throws {MaximumFeeExceededError} If the transfer's cost exceeds the maximum transfer fee option.
+     * @throws {MaximumFeeExceededError} If the transfer's cost exceeds the maximum transfer fee option (1,000,000 base units of the paymaster token if not set).
      */
     transfer({ token, recipient, amount }: TransferOptions, config?: SolanaGaslessWalletPaymasterConfigOverrides): Promise<TransferResult>;
     /**

@@ -122,6 +122,32 @@ function createMockPaymaster (accountAddress = TEST_ACCOUNT_ADDRESS) {
 let mockRpc
 let mockPaymaster
 
+const DEFAULT_MAX_FEE = 1_000_000n
+
+async function stubPaymentAmount (amount) {
+  const [paymasterTokenAccount] = await findAssociatedTokenPda({
+    mint: address(TEST_PAYMASTER_TOKEN),
+    owner: address(TEST_PAYMASTER_ADDRESS),
+    tokenProgram: TOKEN_PROGRAM_ADDRESS
+  })
+
+  const [sourceTokenAccount] = await findAssociatedTokenPda({
+    mint: address(TEST_PAYMASTER_TOKEN),
+    owner: address(TEST_ACCOUNT_ADDRESS),
+    tokenProgram: TOKEN_PROGRAM_ADDRESS
+  })
+
+  mockPaymaster.getPaymentInstruction.mockResolvedValue({
+    payment_amount: Number(amount),
+    payment_instruction: getTransferInstruction({
+      source: sourceTokenAccount,
+      destination: paymasterTokenAccount,
+      authority: address(TEST_ACCOUNT_ADDRESS),
+      amount
+    })
+  })
+}
+
 const actualSolanaRpc = await import('@solana/rpc')
 const actualKora = await import('@solana/kora')
 
@@ -516,6 +542,50 @@ describe('WalletAccountSolanaGasless', () => {
       expect(result).toHaveProperty('hash')
     })
 
+    test('should throw if the fee exceeds the default transaction max fee when none is configured', async () => {
+      await stubPaymentAmount(DEFAULT_MAX_FEE + 1n)
+
+      await expect(
+        account.sendTransaction({
+          to: TEST_RECIPIENT_ADDRESS,
+          value: 1000000n
+        })
+      ).rejects.toThrow('Exceeded maximum fee cost for transaction operation.')
+      expect(mockPaymaster.signAndSendTransaction).not.toHaveBeenCalled()
+    })
+
+    test('should allow a fee equal to the default transaction max fee when none is configured', async () => {
+      await stubPaymentAmount(DEFAULT_MAX_FEE)
+
+      const result = await account.sendTransaction({
+        to: TEST_RECIPIENT_ADDRESS,
+        value: 1000000n
+      })
+
+      expect(result).toEqual({
+        hash: DUMMY_SIGNATURE,
+        fee: DEFAULT_MAX_FEE
+      })
+    })
+
+    test('should compare the exact u64 payment amount against transactionMaxFee', async () => {
+      await stubPaymentAmount(2n ** 53n + 1n)
+
+      const limitedAccount = new WalletAccountSolanaGasless(
+        TEST_SEED_PHRASE,
+        "0'/0'",
+        { ...TEST_CONFIG, transactionMaxFee: 2n ** 53n }
+      )
+
+      await expect(
+        limitedAccount.sendTransaction({
+          to: TEST_RECIPIENT_ADDRESS,
+          value: 1000000n
+        })
+      ).rejects.toThrow('Exceeded maximum fee cost for transaction operation.')
+      expect(mockPaymaster.signAndSendTransaction).not.toHaveBeenCalled()
+    })
+
     test('should reject a payment instruction that transfers more than payment_amount claims', async () => {
       mockPaymaster.getPaymentInstruction.mockImplementation(async () => {
         const [paymasterTokenAccount] = await findAssociatedTokenPda({
@@ -774,6 +844,17 @@ describe('WalletAccountSolanaGasless', () => {
   })
 
   describe('signTransaction', () => {
+    test('should throw if the fee exceeds the default transaction max fee when none is configured', async () => {
+      await stubPaymentAmount(DEFAULT_MAX_FEE + 1n)
+
+      await expect(
+        account.signTransaction({
+          to: TEST_RECIPIENT_ADDRESS,
+          value: 1000000n
+        })
+      ).rejects.toThrow('Exceeded maximum fee cost for transaction operation.')
+      expect(mockPaymaster.signTransaction).not.toHaveBeenCalled()
+    })
     test('should sign a transaction without broadcasting, then broadcast it manually via the rpc', async () => {
       mockRpc.sendTransaction = jest.fn().mockReturnValue({
         send: jest.fn().mockResolvedValue('manual-broadcast-sig-xyz')
@@ -1072,6 +1153,36 @@ describe('WalletAccountSolanaGasless', () => {
         })
       ).rejects.toThrow('Invalid payment instruction from paymaster.')
       expect(mockPaymaster.signAndSendTransaction).not.toHaveBeenCalled()
+    })
+
+    test('should throw if the fee exceeds the default transfer max fee when none is configured', async () => {
+      await stubPaymentAmount(DEFAULT_MAX_FEE + 1n)
+
+      await expect(
+        account.transfer({
+          token: TEST_PAYMASTER_TOKEN,
+          recipient: TEST_RECIPIENT_ADDRESS,
+          amount: 1000n
+        })
+      ).rejects.toThrow('Exceeded maximum fee cost for transfer operation.')
+      expect(mockPaymaster.signAndSendTransaction).not.toHaveBeenCalled()
+    })
+
+    test('should allow a fee above the default when transferMaxFee is configured higher', async () => {
+      await stubPaymentAmount(DEFAULT_MAX_FEE + 1n)
+
+      const result = await account.transfer({
+        token: TEST_PAYMASTER_TOKEN,
+        recipient: TEST_RECIPIENT_ADDRESS,
+        amount: 1000n
+      }, {
+        transferMaxFee: DEFAULT_MAX_FEE + 1n
+      })
+
+      expect(result).toEqual({
+        hash: DUMMY_SIGNATURE,
+        fee: DEFAULT_MAX_FEE + 1n
+      })
     })
 
     test('should successfully transfer tokens', async () => {
